@@ -1,0 +1,5 @@
+{
+  "name": "Kurikulum PTI 2026 - Intelligent Curriculum Designer",
+  "description": "A high-performance interactive curriculum mapper for universities. Features include drag-and-drop semester management, credit calculation, course dependency visualization with dynamic arrows, and AI-powered curriculum generation using Gemini.",
+  "requestFramePermissions": []
+}
