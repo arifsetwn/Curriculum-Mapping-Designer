@@ -31,4 +31,5 @@ export enum CourseColor {
   Red = 'red',
   Purple = 'purple',
   Gray = 'gray',
+  White = 'white',
 }

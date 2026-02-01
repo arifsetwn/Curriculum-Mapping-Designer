@@ -17,26 +17,30 @@ const STORAGE_KEYS = {
   CONNECTIONS: 'pti_2026_connections'
 };
 
-// Helper for dynamic colors
+// Helper for dynamic colors - Updated for new color scheme
 const getCourseColorClasses = (color: string) => {
   switch (color) {
-    case 'blue': return 'bg-blue-50 text-blue-800 border-blue-200';
-    case 'green': return 'bg-emerald-50 text-emerald-800 border-emerald-200';
-    case 'yellow': return 'bg-amber-50 text-amber-800 border-amber-200';
-    case 'red': return 'bg-rose-50 text-rose-800 border-rose-200';
-    case 'purple': return 'bg-indigo-50 text-indigo-800 border-indigo-200';
-    default: return 'bg-slate-50 text-slate-800 border-slate-200';
+    case 'blue': return 'bg-blue-50 text-blue-700 border-blue-200'; // MKU
+    case 'green': return 'bg-emerald-50 text-emerald-700 border-emerald-200'; // MKDK
+    case 'white': return 'bg-white text-slate-700 border-slate-300 shadow-sm'; // MKBK (Changed to White)
+    case 'purple': return 'bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200'; // MKKPB
+    case 'gray': return 'bg-orange-50 text-orange-700 border-orange-200'; // MKPP
+    case 'yellow': return 'bg-yellow-50 text-yellow-700 border-yellow-200'; // MK Pilihan (Changed to Yellow)
+    case 'red': return 'bg-rose-50 text-rose-700 border-rose-200'; // Legacy Red
+    default: return 'bg-slate-50 text-slate-700 border-slate-200';
   }
 };
 
 const getSksBadgeClasses = (color: string) => {
   switch (color) {
-    case 'blue': return 'bg-blue-200/50 text-blue-700';
-    case 'green': return 'bg-emerald-200/50 text-emerald-700';
-    case 'yellow': return 'bg-amber-200/50 text-amber-700';
-    case 'red': return 'bg-rose-200/50 text-rose-700';
-    case 'purple': return 'bg-indigo-200/50 text-indigo-700';
-    default: return 'bg-slate-200 text-slate-600';
+    case 'blue': return 'bg-blue-200/50 text-blue-800';
+    case 'green': return 'bg-emerald-200/50 text-emerald-800';
+    case 'white': return 'bg-slate-100 text-slate-600 border border-slate-200';
+    case 'purple': return 'bg-fuchsia-200/50 text-fuchsia-800';
+    case 'gray': return 'bg-orange-200/50 text-orange-800';
+    case 'yellow': return 'bg-yellow-200/50 text-yellow-800';
+    case 'red': return 'bg-rose-200/50 text-rose-800';
+    default: return 'bg-slate-200 text-slate-800';
   }
 };
 
@@ -44,10 +48,10 @@ const getFullLabel = (color: string) => {
   switch (color) {
     case 'blue': return 'Mata Kuliah Umum (MKU)';
     case 'green': return 'Mata Kuliah Dasar Kependidikan (MKDK)';
-    case 'yellow': return 'Mata Kuliah Bidang Keahlian (MKBK)';
+    case 'white': return 'Mata Kuliah Bidang Keahlian (MKBK)';
     case 'purple': return 'Mata Kuliah Keterampilan Proses Pembelajaran (MKKPB)';
     case 'gray': return 'Mata Kuliah Pengembangan Pendidikan (MKPP)';
-    case 'red': return 'Mata Kuliah Pilihan';
+    case 'yellow': return 'Mata Kuliah Pilihan';
     default: return 'Lainnya';
   }
 };
@@ -56,10 +60,10 @@ const getAbbreviatedLabel = (color: string) => {
   switch (color) {
     case 'blue': return 'MKU';
     case 'green': return 'MKDK';
-    case 'yellow': return 'MKBK';
+    case 'white': return 'MKBK';
     case 'purple': return 'MKKPB';
     case 'gray': return 'MKPP';
-    case 'red': return 'Pilihan';
+    case 'yellow': return 'Pilihan';
     default: return 'Lain';
   }
 };
@@ -111,7 +115,7 @@ const CourseCard: React.FC<CourseCardProps> = ({
                 {course.name}
               </span>
               {course.description && (
-                <div className="flex items-center gap-1 text-slate-400 group-hover/card:text-slate-500">
+                <div className="flex items-center gap-1 opacity-60 group-hover/card:opacity-100">
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
                   </svg>
@@ -134,7 +138,7 @@ const CourseCard: React.FC<CourseCardProps> = ({
           )}
 
           {isConnecting && !isSelectedForConnection && (
-            <div className="absolute inset-0 bg-indigo-600/10 flex items-center justify-center rounded-lg transition-opacity hover:opacity-100 opacity-0 border-2 border-indigo-400 border-dashed">
+            <div className="absolute inset-0 bg-white/40 flex items-center justify-center rounded-lg transition-opacity hover:opacity-100 opacity-0 border-2 border-indigo-400 border-dashed">
                <span className="text-[10px] text-indigo-800 font-bold bg-white px-2 py-1 rounded shadow-sm">Pilih ini</span>
             </div>
           )}
@@ -407,15 +411,15 @@ export default function App() {
     }
   };
 
-  // Recalculate SKS for each category - Only Smt 1-8
+  // Recalculate SKS for each category - Filtered to only include Smt 1-8
   const sksRecap = useMemo(() => {
     const recap: Record<string, number> = {
       [CourseColor.Blue]: 0,
       [CourseColor.Green]: 0,
-      [CourseColor.Yellow]: 0,
+      [CourseColor.White]: 0,
       [CourseColor.Purple]: 0,
       [CourseColor.Gray]: 0,
-      [CourseColor.Red]: 0,
+      [CourseColor.Yellow]: 0,
     };
 
     semesters.forEach(sem => {
@@ -434,7 +438,7 @@ export default function App() {
   const coreSks = useMemo(() => {
     return sksRecap[CourseColor.Blue] + 
            sksRecap[CourseColor.Green] + 
-           sksRecap[CourseColor.Yellow] + 
+           sksRecap[CourseColor.White] + 
            sksRecap[CourseColor.Purple] + 
            sksRecap[CourseColor.Gray];
   }, [sksRecap]);
@@ -620,7 +624,7 @@ export default function App() {
             <div key={opt.value} className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-slate-100 bg-slate-50 shrink-0 shadow-sm">
               <div className={`w-2.5 h-2.5 rounded-full ${getCourseColorClasses(opt.value)} border border-current opacity-70`} />
               <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">{getAbbreviatedLabel(opt.value)}:</span>
-              <span className="text-xs font-black text-slate-800">{sksRecap[opt.value]}</span>
+              <span className="text-xs font-black text-slate-800">{sksRecap[opt.value] || 0}</span>
             </div>
           ))}
         </div>
