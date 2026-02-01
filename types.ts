@@ -17,6 +17,8 @@ export interface Connection {
   id: string;
   fromId: string;
   toId: string;
+  pathType?: 'smooth' | 'grid' | 'straight';
+  controlPoints?: { x: number; y: number }[];
 }
 
 export interface CurriculumState {
