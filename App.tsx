@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import * as XArrowsModule from 'react-xarrows';
 import { toPng } from 'html-to-image';
@@ -49,6 +49,18 @@ const getFullLabel = (color: string) => {
     case 'gray': return 'Mata Kuliah Pengembangan Pendidikan (MKPP)';
     case 'red': return 'Mata Kuliah Pilihan';
     default: return 'Lainnya';
+  }
+};
+
+const getAbbreviatedLabel = (color: string) => {
+  switch (color) {
+    case 'blue': return 'MKU';
+    case 'green': return 'MKDK';
+    case 'yellow': return 'MKBK';
+    case 'purple': return 'MKKPB';
+    case 'gray': return 'MKPP';
+    case 'red': return 'Pilihan';
+    default: return 'Lain';
   }
 };
 
@@ -395,10 +407,42 @@ export default function App() {
     }
   };
 
-  // Calculate total SKS excluding MK Pilihan
-  const totalRegularSks = semesters
-    .filter(s => s.id !== 'semester-elective')
-    .reduce((acc, s) => acc + s.courses.reduce((sum, c) => sum + c.sks, 0), 0);
+  // Recalculate SKS for each category - Only Smt 1-8
+  const sksRecap = useMemo(() => {
+    const recap: Record<string, number> = {
+      [CourseColor.Blue]: 0,
+      [CourseColor.Green]: 0,
+      [CourseColor.Yellow]: 0,
+      [CourseColor.Purple]: 0,
+      [CourseColor.Gray]: 0,
+      [CourseColor.Red]: 0,
+    };
+
+    semesters.forEach(sem => {
+      if (sem.id === 'semester-elective') return;
+      sem.courses.forEach(course => {
+        if (recap.hasOwnProperty(course.color)) {
+          recap[course.color] += course.sks;
+        }
+      });
+    });
+
+    return recap;
+  }, [semesters]);
+
+  // Beban Inti: MKU + MKDK + MKBK + MKKPB + MKPP (Hanya Smt 1-8)
+  const coreSks = useMemo(() => {
+    return sksRecap[CourseColor.Blue] + 
+           sksRecap[CourseColor.Green] + 
+           sksRecap[CourseColor.Yellow] + 
+           sksRecap[CourseColor.Purple] + 
+           sksRecap[CourseColor.Gray];
+  }, [sksRecap]);
+
+  // Total Seluruhnya di Smt 1-8 (termasuk jika ada MK Pilihan di dlm semester)
+  const totalSksSmt1to8 = useMemo(() => {
+    return Object.values(sksRecap).reduce((a: number, b: number) => a + b, 0);
+  }, [sksRecap]);
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-slate-50">
@@ -569,10 +613,27 @@ export default function App() {
         </div>
       </div>
 
-      <footer className="bg-white border-t border-slate-200 p-5 flex justify-end items-center text-sm text-slate-600 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-        <div className="flex items-center gap-2 bg-slate-100 px-4 py-2 rounded-xl border border-slate-200 shrink-0 ml-4">
-           <span className="text-xs font-bold text-slate-500 uppercase hidden sm:inline">Total Beban (Smt 1-8)</span>
-           <span className="text-sm font-black text-indigo-600">{totalRegularSks} SKS</span>
+      <footer className="bg-white border-t border-slate-200 px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-slate-600 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] overflow-x-auto">
+        <div className="flex items-center gap-3 overflow-x-auto max-w-full pb-2 md:pb-0 scrollbar-hide">
+          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest border-r border-slate-200 pr-3 shrink-0">Rekap SKS (Smt 1-8):</span>
+          {COLOR_OPTIONS.map(opt => (
+            <div key={opt.value} className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-slate-100 bg-slate-50 shrink-0 shadow-sm">
+              <div className={`w-2.5 h-2.5 rounded-full ${getCourseColorClasses(opt.value)} border border-current opacity-70`} />
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">{getAbbreviatedLabel(opt.value)}:</span>
+              <span className="text-xs font-black text-slate-800">{sksRecap[opt.value]}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex items-center gap-3 shrink-0 ml-auto">
+           <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
+             <span className="text-[10px] font-bold text-slate-500 uppercase">Beban Wajib:</span>
+             <span className="text-xs font-black text-slate-700">{coreSks} SKS</span>
+           </div>
+           <div className="flex items-center gap-2 bg-indigo-600 px-4 py-2 rounded-xl shadow-lg shadow-indigo-100">
+             <span className="text-[11px] font-black text-white/80 uppercase tracking-wider">Total Kredit (Smt 1-8)</span>
+             <span className="text-sm font-black text-white">{totalSksSmt1to8} SKS</span>
+           </div>
         </div>
       </footer>
 

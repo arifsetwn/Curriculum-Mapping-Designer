@@ -1,13 +1,15 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+// Always use the process.env.API_KEY directly as a named parameter.
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export const generateCurriculumSuggestion = async (major: string) => {
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
-      contents: `Generate a sample 8-semester curriculum for a ${major} major. Return exactly 8 semesters with 3-5 courses each. Each course needs a name, SKS (credits, usually 2-4), and a suggested color category (choose from: bg-blue-500, bg-green-500, bg-yellow-400, bg-purple-500, bg-red-500).`,
+      // Use color values that match the application's CourseColor enum (blue, green, yellow, purple, gray, red).
+      contents: `Generate a sample 8-semester curriculum for a ${major} major. Return exactly 8 semesters with 3-5 courses each. Each course needs a name, SKS (credits, usually 2-4), and a suggested color category (choose from: blue, green, yellow, purple, gray, red).`,
       config: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -41,7 +43,10 @@ export const generateCurriculumSuggestion = async (major: string) => {
       }
     });
 
-    return JSON.parse(response.text);
+    // Access the .text property directly to get the generated string.
+    const jsonStr = response.text?.trim();
+    if (!jsonStr) return null;
+    return JSON.parse(jsonStr);
   } catch (error) {
     console.error("Gemini Error:", error);
     return null;
